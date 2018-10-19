@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -139,23 +140,9 @@ class HSBleManager {
      * @param device：设备
      */
     public void disconnect(final BluetoothDevice device) {
-        if (clientBluetoothGatt != null &&
-                (clientBluetoothGatt.getConnectionState(device) == BluetoothProfile.STATE_CONNECTED
-                        || clientBluetoothGatt.getConnectionState(device) == BluetoothProfile.STATE_CONNECTING)) {
+        if (clientBluetoothGatt != null) {
             clientBluetoothGatt.disconnect();
         }
-    }
-
-
-    /**
-     * 是否已经连接成功
-     * @return
-     */
-    public boolean isConnected() {
-        if (clientBluetoothGatt == null || clientBluetoothGatt.getDevice()==null) {
-            return false;
-        }
-        return true;
     }
 
     /**

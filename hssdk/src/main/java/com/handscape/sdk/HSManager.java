@@ -106,28 +106,6 @@ public class HSManager {
     }
 
     /**
-     * 连接设备
-     *
-     * @param device
-     * @param connectCallback
-     * @param bluetoothGattCallback
-     */
-    public void connect(final BluetoothDevice device, long time, final IHSCommonCallback connectCallback, final HSBluetoothGattCmd bluetoothGattCallback) {
-        if (hsBleManager != null) {
-            schedule(new Runnable() {
-                @Override
-                public void run() {
-                    if (hsBleManager != null && !hsBleManager.isConnected()) {
-                        Log.v("xuyeAction","断开连接");
-                        hsBleManager.disconnect(device);
-                    }
-                }
-            }, time);
-            hsBleManager.connect(device, connectCallback, bluetoothGattCallback);
-        }
-    }
-
-    /**
      * 连接后自动将指令转化到OnReceive中
      *
      * @param device
@@ -140,9 +118,11 @@ public class HSManager {
             schedule(new Runnable() {
                 @Override
                 public void run() {
-                    if (hsBleManager != null && !hsBleManager.isConnected()) {
-                        Log.v("xuyeAction","断开连接");
+                    if (hsBleManager != null && !hsBluetoothGattCmd.isConnect()) {
                         hsBleManager.disconnect(device);
+                        if(connectCallback!=null){
+                            connectCallback.failed();
+                        }
                     }
                 }
             }, time);

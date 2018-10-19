@@ -51,15 +51,17 @@ public class ConnectActivity extends Activity {
             }
         });
 
-        MyApp.getMyapp().getHsManager().connect(device,20*1000, new IHSCommonCallback() {
+        MyApp.getMyapp().getHsManager().connect(device,10*1000, new IHSCommonCallback() {
             @Override
             public void failed() {
+                Log.v("xuyeAction","failed");
                 append("failed");
                 showstring();
             }
 
             @Override
             public void success() {
+                Log.v("xuyeAction","success");
                 append("success");
                 showstring();
             }
@@ -73,6 +75,7 @@ public class ConnectActivity extends Activity {
 
             @Override
             public void onDeviceConnected(BluetoothGatt gatt, int status) {
+                Log.v("xuyeAction","onDeviceConnected");
                 append("onDeviceConnected");
                 showstring();
 
@@ -80,8 +83,9 @@ public class ConnectActivity extends Activity {
 
             @Override
             public void onDeviceDisConnected(BluetoothGatt gatt, int status) {
+                Log.v("xuyeAction","onDeviceDisConnected");
                 append("onDeviceDisConnected");
-                finish();
+//                finish();
                 showstring();
 
             }
