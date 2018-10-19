@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
@@ -344,11 +345,26 @@ public class HSUtils {
 
 
     public static DisplayMetrics getScreenSize(Context context) {
-        Point size=new Point();
+        Point size = new Point();
         WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics metrics = new DisplayMetrics();
         manager.getDefaultDisplay().getRealMetrics(metrics);
         return metrics;
+    }
+
+
+    public static boolean isSupportDevice(BluetoothDevice device, String[] supportName) {
+        if (device == null || TextUtils.isEmpty(device.getName())) {
+            return false;
+        }
+        boolean flag = false;
+        for (int i = 0; i < supportName.length; i++) {
+            if (device.getName().equals(supportName[i])) {
+                flag = true;
+                break;
+            }
+        }
+        return flag;
     }
 
 

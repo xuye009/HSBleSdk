@@ -1,6 +1,9 @@
 package com.handscape.blesdk;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,12 +19,14 @@ import java.util.List;
 
 import com.handscape.sdk.HSManager;
 import com.handscape.sdk.inf.IHSBleScanCallBack;
+import com.handscape.sdk.inf.IHSCommonCallback;
+import com.handscape.sdk.inf.IHSConnectRecevive;
 import com.handscape.sdk.util.HSPermissionCheck;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener, IHSBleScanCallBack {
 
 
-    private Button scanbuttonn, disscanbutton;
+    private Button scanbuttonn, disscanbutton, scanbuttonautton;
     private RecyclerView recyclelist;
     private Adapter mAdapter;
 
@@ -36,12 +41,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        hsManager=MyApp.getMyapp().getHsManager();
+        hsManager = MyApp.getMyapp().getHsManager();
         init();
-        HSPermissionCheck.getInstance().onCreate(this,hsManager.getBleAdapter());
+        HSPermissionCheck.getInstance().onCreate(this, hsManager.getBleAdapter());
     }
 
     private void init() {
+        scanbuttonautton = findViewById(R.id.scanbuttonautton);
         scanbuttonn = findViewById(R.id.scanbutton);
         disscanbutton = findViewById(R.id.disscanbutton);
         recyclelist = findViewById(R.id.recyclelist);
@@ -51,17 +57,20 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         tv = findViewById(R.id.text);
         scanbuttonn.setOnClickListener(this);
         disscanbutton.setOnClickListener(this);
+        scanbuttonautton.setOnClickListener(this);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        HSPermissionCheck.getInstance().onRequestPermissionsResult(requestCode,permissions,grantResults);
+        HSPermissionCheck.getInstance().onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        HSPermissionCheck.getInstance().onActivityResult(requestCode,resultCode,data);
+        HSPermissionCheck.getInstance().onActivityResult(requestCode, resultCode, data);
     }
+
+    StringBuilder builder = new StringBuilder();
 
     @Override
     public void onClick(View v) {
@@ -72,6 +81,93 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 break;
             case R.id.disscanbutton:
                 hsManager.stopScanning(this);
+                break;
+            case R.id.scanbuttonautton:
+                builder = new StringBuilder();
+                recyclelist.setVisibility(View.GONE);
+                hsManager.startScanningWithAutoConnecting(10*1000, 20*1000,
+                        new String[]{"HS","HSPro"}, new IHSCommonCallback() {
+                            @Override
+                            public void failed() {
+                                builder.append("failed\n");
+                                tv.setText(builder.toString());
+                            }
+
+                            @Override
+                            public void success() {
+                                builder.append("success\n");
+                                tv.setText(builder.toString());
+
+                            }
+                        }, new IHSConnectRecevive() {
+                            @Override
+                            public void onDeviceVerifySuccess(BluetoothGatt gatt, int status) {
+                                builder.append("onDeviceVerifySuccess\n");
+                                tv.setText(builder.toString());
+
+                            }
+
+                            @Override
+                            public void onDeviceConnected(BluetoothGatt gatt, int status) {
+                                builder.append("onDeviceConnected\n");
+                                tv.setText(builder.toString());
+
+                            }
+
+                            @Override
+                            public void onDeviceDisConnected(BluetoothGatt gatt, int status) {
+                                builder.append("onDeviceDisConnected\n");
+                                tv.setText(builder.toString());
+
+                            }
+
+                            @Override
+                            public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+                                builder.append("onCharacteristicChanged\n");
+                                tv.setText(builder.toString());
+                            }
+
+                            @Override
+                            public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+
+                            }
+
+                            @Override
+                            public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+
+                            }
+
+                            @Override
+                            public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+
+                            }
+
+                            @Override
+                            public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+
+                            }
+
+                            @Override
+                            public void onPhyRead(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
+
+                            }
+
+                            @Override
+                            public void onPhyUpdate(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
+
+                            }
+
+                            @Override
+                            public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+
+                            }
+
+                            @Override
+                            public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
+
+                            }
+                        });
+
                 break;
         }
 

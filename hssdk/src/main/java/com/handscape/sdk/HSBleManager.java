@@ -7,11 +7,9 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
-import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -39,6 +37,7 @@ class HSBleManager {
 
 
     private Handler mScheduledExecutorHandler = null;
+
 
     public BluetoothAdapter getBleAdapter() {
         return mAdapter;
@@ -126,6 +125,46 @@ class HSBleManager {
             }
             return false;
         }
+    }
+
+
+    /**
+     *  * 扫描并且自动连接
+     *
+     * @param scanningTimeout：扫描时长
+     * @param connectingTimeout：连接超时
+     * @param supportName：符合要求的设备名称
+     * @param scanningTimeout：扫描超时
+     * @param connectingTimeout：连接超时
+     * @param supportName：支持的名称
+     * @param commonCallback：连接回调
+     * @param hsBluetoothGattCmd：获取数据回调
+     * @return
+     */
+    public boolean startScanningWithAutoConnecting(final long scanningTimeout, final long connectingTimeout, final String[] supportName, final IHSCommonCallback commonCallback, final HSBluetoothGattCmd hsBluetoothGattCmd) {
+
+        boolean flag = false;
+        BluetoothDevice device = null;
+        //首先获取系统已经连接的设备
+        List<BluetoothDevice> systemConnectingDeviceList = getSystemConnectingDevice();
+        for (int i = 0; i < systemConnectingDeviceList.size(); i++) {
+            if (HSUtils.isSupportDevice(systemConnectingDeviceList.get(i), supportName)) {
+                device = systemConnectingDeviceList.get(i);
+                flag = true;
+                break;
+            }
+        }
+        if (flag && device != null) {
+            connect(device, connectingTimeout, commonCallback, hsBluetoothGattCmd);
+            return true;
+        } else {
+            ihsBleScanCallBack.setConnectingTimeOut(connectingTimeout);
+            ihsBleScanCallBack.setSupportName(supportName);
+            ihsBleScanCallBack.setCommonCallback(commonCallback);
+            ihsBleScanCallBack.setHsBluetoothGattCmd(hsBluetoothGattCmd);
+            return startScanning(ihsBleScanCallBack, scanningTimeout);
+        }
+
     }
 
     /**
@@ -363,5 +402,66 @@ class HSBleManager {
         }
     }
 
+    private AutoConnectingCallBack ihsBleScanCallBack = new AutoConnectingCallBack();
+
+    class AutoConnectingCallBack implements IHSBleScanCallBack {
+
+        private long timeout;
+
+        public void setConnectingTimeOut(long timeout) {
+            this.timeout = timeout;
+        }
+
+        private String[] supportName;
+
+        public void setSupportName(String[] deviceName) {
+            this.supportName = deviceName;
+        }
+
+        private IHSCommonCallback commonCallback;
+
+        public void setCommonCallback(IHSCommonCallback commonCallback) {
+            this.commonCallback = commonCallback;
+        }
+
+        private HSBluetoothGattCmd hsBluetoothGattCmd;
+
+        public void setHsBluetoothGattCmd(HSBluetoothGattCmd hsBluetoothGattCmd) {
+            this.hsBluetoothGattCmd = hsBluetoothGattCmd;
+        }
+
+        private boolean flag = false;
+
+        @Override
+        public void scanfailed(int code) {
+            flag = false;
+            if (commonCallback != null) {
+                commonCallback.failed();
+            }
+        }
+
+        @Override
+        public void scanfinish() {
+            if (!flag) {
+                if (commonCallback != null) {
+                    commonCallback.failed();
+                }
+            }
+        }
+
+        @Override
+        public void onScanResult(BluetoothDevice device, int rssi) {
+            if (HSUtils.isSupportDevice(device, supportName)) {
+                flag = true;
+                stopScanning();
+                connect(device, timeout, commonCallback, hsBluetoothGattCmd);
+            }
+        }
+
+        @Override
+        public void onBatchScanResults(List<BluetoothDevice> deviceList) {
+
+        }
+    }
 
 }

@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
+import android.util.Log;
 
 import java.util.List;
 import java.util.UUID;
@@ -43,6 +44,8 @@ import com.handscape.sdk.util.HSSingleTaskManager;
                     onDeviceConnected(gatt, status);
                     if (gatt != null && (gatt.getServices() == null || gatt.getServices().size() == 0)) {
                         gatt.discoverServices();
+                    }else if(gatt!=null&&gatt.getServices().size()>0){
+                        handservice(gatt,status);
                     }
                     break;
                 case BluetoothGatt.STATE_CONNECTING:
@@ -66,6 +69,14 @@ import com.handscape.sdk.util.HSSingleTaskManager;
 
     @Override
     public void onServicesDiscovered(final BluetoothGatt gatt, int status) {
+        handservice(gatt,status);
+    }
+
+
+
+    private void handservice(final BluetoothGatt gatt, int status){
+
+        Log.v("xuye","onServicesDiscovered"+gatt.getServices().size());
         if (gatt != null && gatt.getServices() != null && gatt.getServices().size() > 0) {
             List<BluetoothGattService> gattServices = gatt.getServices();
             for (int i = 0; i < gattServices.size(); i++) {
@@ -108,8 +119,6 @@ import com.handscape.sdk.util.HSSingleTaskManager;
             singleTaskManager.runTask();
         }
     }
-
-
     /**
      * 接收到数据
      *

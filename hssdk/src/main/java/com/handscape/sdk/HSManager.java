@@ -81,6 +81,41 @@ public class HSManager {
         }
     }
 
+
+    /**
+     * * 扫描并且自动连接
+     *
+     * @param scanningTimeout：扫描时长
+     * @param connectingTimeout：连接超时
+     * @param supportName：符合要求的设备名称
+     * @param scanningTimeout：扫描超时
+     * @param connectingTimeout：连接超时
+     * @param supportName：支持的名称
+     * @param commonCallback：连接回调
+     * @param receive：获取数据回调
+     * @return
+     */
+    public boolean startScanningWithAutoConnecting(final long scanningTimeout,
+                                                   final long connectingTimeout,
+                                                   final String[] supportName,
+                                                   final IHSCommonCallback commonCallback,
+                                                   final IHSConnectRecevive receive) {
+        if (isScanning) {
+            return true;
+        }
+        hsBluetoothGattCmd.setIhsConnectRecevive(receive);
+        if (hsBleManager != null &&
+                hsBleManager.startScanningWithAutoConnecting(
+                        scanningTimeout, connectingTimeout,
+                        supportName, commonCallback,
+                        hsBluetoothGattCmd)) {
+            isScanning = true;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * 停止扫描
      */
@@ -97,6 +132,7 @@ public class HSManager {
 
     /**
      * 连接后自动将指令转化到OnReceive中
+     *
      * @param device：要连接的设备
      * @param time：时间
      * @param connectCallback：连接状态接口
@@ -105,7 +141,7 @@ public class HSManager {
     public void connect(final BluetoothDevice device, long time, final IHSCommonCallback connectCallback, final IHSConnectRecevive bluetoothGattCallback) {
         hsBluetoothGattCmd.setIhsConnectRecevive(bluetoothGattCallback);
         if (hsBleManager != null) {
-            hsBleManager.connect(device, time,connectCallback, hsBluetoothGattCmd);
+            hsBleManager.connect(device, time, connectCallback, hsBluetoothGattCmd);
         }
     }
 

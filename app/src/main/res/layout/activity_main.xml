@@ -12,6 +12,11 @@
 
 
     <Button
+        android:id="@+id/scanbuttonautton"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="扫描并且自动连接设备" />
+    <Button
         android:id="@+id/disscanbutton"
         android:layout_width="match_parent"
         android:layout_height="40dp"
