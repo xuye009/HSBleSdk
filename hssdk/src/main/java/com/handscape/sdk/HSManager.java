@@ -38,7 +38,7 @@ public class HSManager {
         return mContext;
     }
 
-    private Handler mScheduledExecutorHandler =null;
+    private Handler mScheduledExecutorHandler = null;
 
 
     private HSBleManager hsBleManager;
@@ -88,7 +88,7 @@ public class HSManager {
                 @Override
                 public void run() {
                     if (hsBleManager != null) {
-                        stopScanning();
+                        stopScanning(iBleScanCallBack);
                     }
                 }
             }, time);
@@ -98,10 +98,13 @@ public class HSManager {
     /**
      * 停止扫描
      */
-    public void stopScanning() {
+    public void stopScanning(final IHSBleScanCallBack iBleScanCallBack) {
         isScanning = false;
         if (hsBleManager != null) {
             hsBleManager.stopScanning();
+            if (iBleScanCallBack != null) {
+                iBleScanCallBack.scanfinish();
+            }
         }
     }
 
@@ -120,7 +123,7 @@ public class HSManager {
                 public void run() {
                     if (hsBleManager != null && !hsBluetoothGattCmd.isConnect()) {
                         hsBleManager.disconnect(device);
-                        if(connectCallback!=null){
+                        if (connectCallback != null) {
                             connectCallback.failed();
                         }
                     }
@@ -271,7 +274,7 @@ public class HSManager {
      * @param time：延迟的时间/毫秒
      */
     private void schedule(Runnable runnable, long time) {
-        if(mScheduledExecutorHandler!=null){
+        if (mScheduledExecutorHandler != null) {
             mScheduledExecutorHandler.postDelayed(runnable, time);
         }
     }

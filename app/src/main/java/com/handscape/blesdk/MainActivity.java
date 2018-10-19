@@ -71,7 +71,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 devices.clear();
                 break;
             case R.id.disscanbutton:
-                hsManager.stopScanning();
+                hsManager.stopScanning(this);
                 break;
         }
 
@@ -84,6 +84,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     @Override
     public void scanfailed(int code) {
         tv.setText("scanfailed失败" + code);
+    }
+
+    @Override
+    public void scanfinish() {
+
     }
 
     @Override

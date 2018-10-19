@@ -7,6 +7,7 @@ import java.util.List;
 public interface IHSBleScanCallBack {
     void scanfailed(int code);
 
+    void scanfinish();
     void onScanResult(BluetoothDevice device, int rssi);
 
     void onBatchScanResults(List<BluetoothDevice> deviceList);
