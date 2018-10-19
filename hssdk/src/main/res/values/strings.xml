@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">HandscapeAndroidSDK</string>
+
+
+    <string name="left_1">左1</string>
+    <string name="left_2">左2</string>
+    <string name="right_1">右1</string>
+    <string name="right_2">右2</string>
+</resources>
