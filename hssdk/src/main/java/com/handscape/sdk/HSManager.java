@@ -5,15 +5,10 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Handler;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.widget.Toast;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import com.handscape.sdk.ble.HSBluetoothGattCmd;
 import com.handscape.sdk.util.HSUtils;
@@ -38,9 +33,6 @@ public class HSManager {
         return mContext;
     }
 
-    private Handler mScheduledExecutorHandler = null;
-
-
     private HSBleManager hsBleManager;
 
     private HSTouchManager hsTouchManager;
@@ -60,7 +52,6 @@ public class HSManager {
     }
 
     private HSManager(int width, int height, IHSTouchCmdReceive receive) {
-        mScheduledExecutorHandler = new Handler();
         this.screenWidth = width;
         this.screenHeight = height;
         hsBleManager = new HSBleManager(mContext);
@@ -70,28 +61,23 @@ public class HSManager {
 
 
     /**
-     * 开始赛秒
+     * 开始扫描
      *
      * @param time：时间限制
      * @param iBleScanCallBack
      */
-    public void startScanning(final long time, final IHSBleScanCallBack iBleScanCallBack) {
+    public boolean startScanning(final long time, final IHSBleScanCallBack iBleScanCallBack) {
         if (isScanning) {
             if (iBleScanCallBack != null) {
                 iBleScanCallBack.scanfailed(IHSBleScanCallBack.ERROR_ISSCANNING);
             }
-            return;
+            return true;
         }
-        if (hsBleManager != null && hsBleManager.startScanning(iBleScanCallBack)) {
+        if (hsBleManager != null && hsBleManager.startScanning(iBleScanCallBack, time)) {
             isScanning = true;
-            schedule(new Runnable() {
-                @Override
-                public void run() {
-                    if (hsBleManager != null) {
-                        stopScanning(iBleScanCallBack);
-                    }
-                }
-            }, time);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -108,39 +94,27 @@ public class HSManager {
         }
     }
 
+
     /**
      * 连接后自动将指令转化到OnReceive中
-     *
-     * @param device
-     * @param connectCallback
-     * @param bluetoothGattCallback
+     * @param device：要连接的设备
+     * @param time：时间
+     * @param connectCallback：连接状态接口
+     * @param bluetoothGattCallback：连接成功后，接收数据的接口
      */
     public void connect(final BluetoothDevice device, long time, final IHSCommonCallback connectCallback, final IHSConnectRecevive bluetoothGattCallback) {
         hsBluetoothGattCmd.setIhsConnectRecevive(bluetoothGattCallback);
         if (hsBleManager != null) {
-            schedule(new Runnable() {
-                @Override
-                public void run() {
-                    if (hsBleManager != null && !hsBluetoothGattCmd.isConnect()) {
-                        hsBleManager.disconnect(device);
-                        if (connectCallback != null) {
-                            connectCallback.failed();
-                        }
-                    }
-                }
-            }, time);
-            hsBleManager.connect(device, connectCallback, hsBluetoothGattCmd);
+            hsBleManager.connect(device, time,connectCallback, hsBluetoothGattCmd);
         }
     }
 
     /**
      * 断开连接
-     *
-     * @param device
      */
-    public void disconnect(final BluetoothDevice device) {
+    public void disconnect() {
         if (hsBleManager != null) {
-            hsBleManager.disconnect(device);
+            hsBleManager.disconnect();
         }
     }
 
@@ -264,18 +238,6 @@ public class HSManager {
     public void realease() {
         if (hsBleManager != null) {
             hsBleManager.realease();
-        }
-    }
-
-    /**
-     * 延迟执行任务
-     *
-     * @param runnable：执行的任务
-     * @param time：延迟的时间/毫秒
-     */
-    private void schedule(Runnable runnable, long time) {
-        if (mScheduledExecutorHandler != null) {
-            mScheduledExecutorHandler.postDelayed(runnable, time);
         }
     }
 

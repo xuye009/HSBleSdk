@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Build;
+import android.os.Handler;
 import android.util.Log;
 
 import java.lang.reflect.Method;
@@ -36,6 +37,9 @@ class HSBleManager {
 
     private BluetoothGatt clientBluetoothGatt;
 
+
+    private Handler mScheduledExecutorHandler = null;
+
     public BluetoothAdapter getBleAdapter() {
         return mAdapter;
     }
@@ -45,6 +49,7 @@ class HSBleManager {
     private HSLeScan hsScanCallback = null;
 
     public HSBleManager(Context context) {
+        mScheduledExecutorHandler = new Handler();
         this.mContext = context;
         bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         mAdapter = bluetoothManager.getAdapter();
@@ -58,7 +63,7 @@ class HSBleManager {
      *
      * @param iBleScanCallBack：扫描需要的回调接口
      */
-    public boolean startScanning(final IHSBleScanCallBack iBleScanCallBack) {
+    public boolean startScanning(final IHSBleScanCallBack iBleScanCallBack, final long time) {
         if (hsScanCallback != null) {
             hsScanCallback.setiBleScanCallBack(iBleScanCallBack);
         } else {
@@ -87,10 +92,28 @@ class HSBleManager {
                     }
                     return false;
                 } else {
+                    schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            stopScanning();
+                            if (iBleScanCallBack != null) {
+                                iBleScanCallBack.scanfinish();
+                            }
+                        }
+                    }, time);
                     return true;
                 }
             } else {
                 mAdapter.getBluetoothLeScanner().startScan(hsScanCallback);
+                schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        stopScanning();
+                        if (iBleScanCallBack != null) {
+                            iBleScanCallBack.scanfinish();
+                        }
+                    }
+                }, time);
                 return true;
             }
         } else {
@@ -124,9 +147,20 @@ class HSBleManager {
      * @param device：需要连接的设备
      * @param connectCallback：连接回调
      */
-    public void connect(final BluetoothDevice device, final IHSCommonCallback connectCallback, final HSBluetoothGattCmd bluetoothGattCallback) {
+    public void connect(final BluetoothDevice device, final long time, final IHSCommonCallback connectCallback, final HSBluetoothGattCmd bluetoothGattCallback) {
         if (device != null && initadapter()) {
             clientBluetoothGatt = device.connectGatt(mContext, false, bluetoothGattCallback);
+            schedule(new Runnable() {
+                @Override
+                public void run() {
+                    if (bluetoothGattCallback != null && !bluetoothGattCallback.isConnect()) {
+                        disconnect();
+                        if (connectCallback != null) {
+                            connectCallback.failed();
+                        }
+                    }
+                }
+            }, time);
         } else {
             if (connectCallback != null) {
                 connectCallback.failed();
@@ -136,10 +170,8 @@ class HSBleManager {
 
     /**
      * 断开连接
-     *
-     * @param device：设备
      */
-    public void disconnect(final BluetoothDevice device) {
+    public void disconnect() {
         if (clientBluetoothGatt != null) {
             clientBluetoothGatt.disconnect();
         }
@@ -316,6 +348,19 @@ class HSBleManager {
             e.printStackTrace();
         }
 
+    }
+
+
+    /**
+     * 延迟执行任务
+     *
+     * @param runnable：执行的任务
+     * @param time：延迟的时间/毫秒
+     */
+    private void schedule(Runnable runnable, long time) {
+        if (mScheduledExecutorHandler != null) {
+            mScheduledExecutorHandler.postDelayed(runnable, time);
+        }
     }
 
 
