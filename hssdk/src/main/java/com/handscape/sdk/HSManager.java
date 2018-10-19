@@ -3,6 +3,7 @@ package com.handscape.sdk;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 
 import java.util.List;
@@ -35,7 +36,8 @@ public class HSManager {
         return mContext;
     }
 
-    private ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+    private Handler mScheduledExecutorHandler = new Handler();
+
 
     private HSBleManager hsBleManager;
 
@@ -107,8 +109,16 @@ public class HSManager {
      * @param connectCallback
      * @param bluetoothGattCallback
      */
-    public void connect(final BluetoothDevice device, final IHSCommonCallback connectCallback, final HSBluetoothGattCmd bluetoothGattCallback) {
+    public void connect(final BluetoothDevice device, long time, final IHSCommonCallback connectCallback, final HSBluetoothGattCmd bluetoothGattCallback) {
         if (hsBleManager != null) {
+            schedule(new Runnable() {
+                @Override
+                public void run() {
+                    if (hsBleManager != null && !hsBleManager.isConnected()) {
+                        hsBleManager.disconnect(device);
+                    }
+                }
+            }, time);
             hsBleManager.connect(device, connectCallback, bluetoothGattCallback);
         }
     }
@@ -120,9 +130,17 @@ public class HSManager {
      * @param connectCallback
      * @param bluetoothGattCallback
      */
-    public void connect(final BluetoothDevice device, final IHSCommonCallback connectCallback, final IHSConnectRecevive bluetoothGattCallback) {
+    public void connect(final BluetoothDevice device, long time, final IHSCommonCallback connectCallback, final IHSConnectRecevive bluetoothGattCallback) {
         hsBluetoothGattCmd.setIhsConnectRecevive(bluetoothGattCallback);
         if (hsBleManager != null) {
+            schedule(new Runnable() {
+                @Override
+                public void run() {
+                    if (hsBleManager != null && !hsBleManager.isConnected()) {
+                        hsBleManager.disconnect(device);
+                    }
+                }
+            }, time);
             hsBleManager.connect(device, connectCallback, hsBluetoothGattCmd);
         }
     }
@@ -197,7 +215,7 @@ public class HSManager {
      *
      * @return
      */
-    public List<BluetoothDevice> getSystemConnectingDevice(){
+    public List<BluetoothDevice> getSystemConnectingDevice() {
         if (hsBleManager != null) {
             return hsBleManager.getSystemConnectingDevice();
         }
@@ -268,7 +286,7 @@ public class HSManager {
      * @param time：延迟的时间/毫秒
      */
     private void schedule(Runnable runnable, long time) {
-        service.schedule(runnable, time, TimeUnit.MILLISECONDS);
+        mScheduledExecutorHandler.postDelayed(runnable, time);
     }
 
 

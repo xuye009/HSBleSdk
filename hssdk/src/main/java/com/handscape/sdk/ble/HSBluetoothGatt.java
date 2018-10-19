@@ -20,6 +20,15 @@ import com.handscape.sdk.util.HSSingleTaskManager;
 
     private HSSingleTaskManager singleTaskManager = null;
 
+    /**
+     * 是否链接成功
+     */
+    private boolean isConnect=false;
+
+    public boolean isConnect() {
+        return isConnect;
+    }
+
     public HSBluetoothGatt() {
         singleTaskManager = HSSingleTaskManager.getnewInstance();
     }
@@ -30,14 +39,17 @@ import com.handscape.sdk.util.HSSingleTaskManager;
         if (BluetoothGatt.GATT_SUCCESS == status) {
             switch (newState) {
                 case BluetoothGatt.STATE_CONNECTED:
+                    isConnect=true;
                     onDeviceConnected(gatt, status);
                     if (gatt != null && (gatt.getServices() == null || gatt.getServices().size() == 0)) {
                         gatt.discoverServices();
                     }
                     break;
                 case BluetoothGatt.STATE_CONNECTING:
+                    isConnect=true;
                     break;
                 case BluetoothGatt.STATE_DISCONNECTED:
+                    isConnect=false;
                     onDeviceDisConnected(gatt,status);
                     if (gatt != null) {
                         gatt.close();
@@ -45,6 +57,7 @@ import com.handscape.sdk.util.HSSingleTaskManager;
                     gatt = null;
                     break;
                 case BluetoothGatt.STATE_DISCONNECTING:
+                    isConnect=false;
                     onDeviceDisConnected(gatt,status);
                     break;
             }

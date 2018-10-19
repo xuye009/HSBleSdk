@@ -39,6 +39,7 @@ class HSBleManager {
         return mAdapter;
     }
 
+
     //蓝牙回调类
     private HSLeScan hsScanCallback = null;
 
@@ -145,6 +146,19 @@ class HSBleManager {
         }
     }
 
+
+    /**
+     * 是否已经连接成功
+     * @return
+     */
+    public boolean isConnected() {
+        if (clientBluetoothGatt == null || clientBluetoothGatt.getConnectedDevices() == null || clientBluetoothGatt.getConnectedDevices().size() == 0) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * 向指定的特征值中写指定的数据
      *
@@ -172,6 +186,7 @@ class HSBleManager {
 
     /**
      * 向指定的特征值描述符中中写指定的数据
+     *
      * @param serviceUUid
      * @param charUUid
      * @param descriptoUUid
@@ -201,11 +216,12 @@ class HSBleManager {
 
     /**
      * 读取指定的特征值
+     *
      * @param serviceUUid
      * @param characteristiUUid
      * @return
      */
-    public boolean readCharacteristic(UUID serviceUUid, UUID characteristiUUid){
+    public boolean readCharacteristic(UUID serviceUUid, UUID characteristiUUid) {
         if (clientBluetoothGatt == null) {
             return false;
         }
