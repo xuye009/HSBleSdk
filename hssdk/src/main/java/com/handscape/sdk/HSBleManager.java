@@ -152,10 +152,9 @@ class HSBleManager {
      * @return
      */
     public boolean isConnected() {
-        if (clientBluetoothGatt == null || clientBluetoothGatt.getConnectedDevices() == null || clientBluetoothGatt.getConnectedDevices().size() == 0) {
+        if (clientBluetoothGatt == null || clientBluetoothGatt.getDevice()==null) {
             return false;
         }
-
         return true;
     }
 

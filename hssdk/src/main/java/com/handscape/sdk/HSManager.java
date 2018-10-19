@@ -5,6 +5,8 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.util.List;
 import java.util.Set;
@@ -36,7 +38,7 @@ public class HSManager {
         return mContext;
     }
 
-    private Handler mScheduledExecutorHandler = new Handler();
+    private Handler mScheduledExecutorHandler =null;
 
 
     private HSBleManager hsBleManager;
@@ -58,6 +60,7 @@ public class HSManager {
     }
 
     private HSManager(int width, int height, IHSTouchCmdReceive receive) {
+        mScheduledExecutorHandler = new Handler();
         this.screenWidth = width;
         this.screenHeight = height;
         hsBleManager = new HSBleManager(mContext);
@@ -115,6 +118,7 @@ public class HSManager {
                 @Override
                 public void run() {
                     if (hsBleManager != null && !hsBleManager.isConnected()) {
+                        Log.v("xuyeAction","断开连接");
                         hsBleManager.disconnect(device);
                     }
                 }
@@ -137,6 +141,7 @@ public class HSManager {
                 @Override
                 public void run() {
                     if (hsBleManager != null && !hsBleManager.isConnected()) {
+                        Log.v("xuyeAction","断开连接");
                         hsBleManager.disconnect(device);
                     }
                 }
@@ -286,7 +291,9 @@ public class HSManager {
      * @param time：延迟的时间/毫秒
      */
     private void schedule(Runnable runnable, long time) {
-        mScheduledExecutorHandler.postDelayed(runnable, time);
+        if(mScheduledExecutorHandler!=null){
+            mScheduledExecutorHandler.postDelayed(runnable, time);
+        }
     }
 
 

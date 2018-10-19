@@ -130,10 +130,10 @@ public class HSCharacteristHandle {
                     touchAction = MotionEvent.ACTION_DOWN;
                     break;
                 case 1:
-                    touchAction = MotionEvent.ACTION_MOVE;
+                    touchAction = MotionEvent.ACTION_UP;
                     break;
                 case 2:
-                    touchAction = MotionEvent.ACTION_UP;
+                    touchAction = MotionEvent.ACTION_MOVE;
                     break;
             }
 

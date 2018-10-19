@@ -51,7 +51,7 @@ public class ConnectActivity extends Activity {
             }
         });
 
-        MyApp.getMyapp().getHsManager().connect(device, new IHSCommonCallback() {
+        MyApp.getMyapp().getHsManager().connect(device,20*1000, new IHSCommonCallback() {
             @Override
             public void failed() {
                 append("failed");
@@ -81,6 +81,7 @@ public class ConnectActivity extends Activity {
             @Override
             public void onDeviceDisConnected(BluetoothGatt gatt, int status) {
                 append("onDeviceDisConnected");
+                finish();
                 showstring();
 
             }

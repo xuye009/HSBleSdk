@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.handscape.sdk.HSManager;
-import com.handscape.sdk.help.HSPermissionCheck;
 import com.handscape.sdk.inf.IHSBleScanCallBack;
+import com.handscape.sdk.util.HSPermissionCheck;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener, IHSBleScanCallBack {
 
