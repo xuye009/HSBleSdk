@@ -10,9 +10,8 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
+import android.util.Log;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -38,6 +37,14 @@ class HSBleManager {
 
     private Handler mScheduledExecutorHandler = null;
 
+    /**
+     * 判断是否在扫描中
+     */
+    private boolean isScanning = false;
+
+    public boolean isScanning() {
+        return isScanning;
+    }
 
     public BluetoothAdapter getBleAdapter() {
         return mAdapter;
@@ -56,13 +63,18 @@ class HSBleManager {
         initadapter();
     }
 
-
     /**
      * 开启扫描
      *
      * @param iBleScanCallBack：扫描需要的回调接口
      */
     public boolean startScanning(final IHSBleScanCallBack iBleScanCallBack, final long time) {
+        if (isScanning) {
+            if (iBleScanCallBack != null) {
+                iBleScanCallBack.scanfailed(IHSBleScanCallBack.ERROR_ISSCANNING);
+            }
+            return false;
+        }
         if (hsScanCallback != null) {
             hsScanCallback.setiBleScanCallBack(iBleScanCallBack);
         } else {
@@ -91,6 +103,7 @@ class HSBleManager {
                     }
                     return false;
                 } else {
+                    isScanning = true;
                     schedule(new Runnable() {
                         @Override
                         public void run() {
@@ -103,7 +116,8 @@ class HSBleManager {
                     return true;
                 }
             } else {
-                mAdapter.getBluetoothLeScanner().startScan(hsScanCallback);
+                isScanning = true;
+                mAdapter.getBluetoothLeScanner().startScan(hsScanCallback.getMyScanCallback());
                 schedule(new Runnable() {
                     @Override
                     public void run() {
@@ -127,26 +141,22 @@ class HSBleManager {
         }
     }
 
-
     /**
-     *  * 扫描并且自动连接
+     * * 扫描并且自动连接
      *
      * @param scanningTimeout：扫描时长
      * @param connectingTimeout：连接超时
      * @param supportName：符合要求的设备名称
-     * @param scanningTimeout：扫描超时
-     * @param connectingTimeout：连接超时
      * @param supportName：支持的名称
      * @param commonCallback：连接回调
      * @param hsBluetoothGattCmd：获取数据回调
-     * @return
+     * @return true：开始扫描；false：启动扫描失败
      */
     public boolean startScanningWithAutoConnecting(final long scanningTimeout, final long connectingTimeout, final String[] supportName, final IHSCommonCallback commonCallback, final HSBluetoothGattCmd hsBluetoothGattCmd) {
-
         boolean flag = false;
         BluetoothDevice device = null;
         //首先获取系统已经连接的设备
-        List<BluetoothDevice> systemConnectingDeviceList = getSystemConnectingDevice();
+        List<BluetoothDevice> systemConnectingDeviceList = HSUtils.getSystemConnectingDevice();
         for (int i = 0; i < systemConnectingDeviceList.size(); i++) {
             if (HSUtils.isSupportDevice(systemConnectingDeviceList.get(i), supportName)) {
                 device = systemConnectingDeviceList.get(i);
@@ -164,7 +174,6 @@ class HSBleManager {
             ihsBleScanCallBack.setHsBluetoothGattCmd(hsBluetoothGattCmd);
             return startScanning(ihsBleScanCallBack, scanningTimeout);
         }
-
     }
 
     /**
@@ -174,8 +183,10 @@ class HSBleManager {
         if (mAdapter != null && mAdapter.isEnabled()) {
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
                 mAdapter.stopLeScan(hsScanCallback);
+                isScanning = false;
             } else {
-                mAdapter.getBluetoothLeScanner().stopScan(hsScanCallback);
+                mAdapter.getBluetoothLeScanner().stopScan(hsScanCallback.getMyScanCallback());
+                isScanning = false;
             }
         }
     }
@@ -188,6 +199,7 @@ class HSBleManager {
      */
     public void connect(final BluetoothDevice device, final long time, final IHSCommonCallback connectCallback, final HSBluetoothGattCmd bluetoothGattCallback) {
         if (device != null && initadapter()) {
+            Log.v("xuye", "connect");
             clientBluetoothGatt = device.connectGatt(mContext, false, bluetoothGattCallback);
             schedule(new Runnable() {
                 @Override
@@ -294,7 +306,6 @@ class HSBleManager {
         return clientBluetoothGatt.readCharacteristic(characteristic);
     }
 
-
     /**
      * 获取当前连接的设备
      *
@@ -307,39 +318,6 @@ class HSBleManager {
         return null;
     }
 
-
-    /**
-     * 获取在系统中已经连接的蓝牙设备
-     *
-     * @return
-     */
-    public List<BluetoothDevice> getSystemConnectingDevice() {
-        List<BluetoothDevice> deviceList = new ArrayList<>();
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        Class<BluetoothAdapter> bluetoothAdapterClass = BluetoothAdapter.class;//得到BluetoothAdapter的Class对象
-        try {
-            //得到连接状态的方法
-            Method method = bluetoothAdapterClass.getDeclaredMethod("getConnectionState", (Class[]) null);
-            //打开权限
-            method.setAccessible(true);
-            int state = (int) method.invoke(adapter, (Object[]) null);
-            if (state == BluetoothAdapter.STATE_CONNECTED) {
-                Set<BluetoothDevice> devices = adapter.getBondedDevices();
-                for (BluetoothDevice device : devices) {
-                    Method isConnectedMethod = BluetoothDevice.class.getDeclaredMethod("isConnected", (Class[]) null);
-                    method.setAccessible(true);
-                    boolean isConnected = (boolean) isConnectedMethod.invoke(device, (Object[]) null);
-                    if (isConnected) {
-                        deviceList.add(device);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return deviceList;
-    }
-
     /**
      * 获取已经绑定的设备
      *
@@ -349,7 +327,6 @@ class HSBleManager {
         Set<BluetoothDevice> deviceSet = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
         return deviceSet;
     }
-
 
     //初始化蓝牙设备
     private boolean initadapter() {
@@ -386,9 +363,7 @@ class HSBleManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
-
 
     /**
      * 延迟执行任务
@@ -445,6 +420,10 @@ class HSBleManager {
             if (!flag) {
                 if (commonCallback != null) {
                     commonCallback.failed();
+                }
+            } else {
+                if (commonCallback != null) {
+                    commonCallback.success();
                 }
             }
         }

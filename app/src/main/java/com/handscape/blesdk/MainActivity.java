@@ -188,19 +188,30 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     }
 
     @Override
-    public void onScanResult(BluetoothDevice device, int rssi) {
-        tv.setText("成功onScanResult");
-        if (!devices.contains(device)) {
-            devices.add(device);
+    public void onScanResult(final BluetoothDevice device, int rssi) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                tv.setText("成功onScanResult");
+                if (!devices.contains(device)) {
+                    devices.add(device);
+                }
+                mAdapter.notifyDataSetChanged();
+            }
+        });
 
-        }
-        mAdapter.notifyDataSetChanged();
 
     }
 
     @Override
     public void onBatchScanResults(List<BluetoothDevice> deviceList) {
-        tv.setText("成功onBatchScanResults");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                tv.setText("成功onBatchScanResults");
+            }
+        });
 //        devices.addAll(deviceList);
 //        mAdapter.notifyDataSetChanged();
     }

@@ -1,6 +1,7 @@
 package com.handscape.blesdk;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -26,8 +27,15 @@ public class MyApp extends Application {
     }
 
     @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
+
         hsManager = HSManager.getinstance(this, new IHSTouchCmdReceive() {
             @Override
             public void onCmdReceive(String command) {

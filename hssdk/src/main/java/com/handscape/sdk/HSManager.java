@@ -3,7 +3,6 @@ package com.handscape.sdk;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.os.Handler;
 import android.util.DisplayMetrics;
 
 import java.util.List;
@@ -26,8 +25,6 @@ public class HSManager {
     private static Context mContext;
 
     private int screenWidth, screenHeight;
-
-    private boolean isScanning = false;
 
     public static Context getContext() {
         return mContext;
@@ -67,14 +64,7 @@ public class HSManager {
      * @param iBleScanCallBack
      */
     public boolean startScanning(final long time, final IHSBleScanCallBack iBleScanCallBack) {
-        if (isScanning) {
-            if (iBleScanCallBack != null) {
-                iBleScanCallBack.scanfailed(IHSBleScanCallBack.ERROR_ISSCANNING);
-            }
-            return true;
-        }
         if (hsBleManager != null && hsBleManager.startScanning(iBleScanCallBack, time)) {
-            isScanning = true;
             return true;
         } else {
             return false;
@@ -100,16 +90,12 @@ public class HSManager {
                                                    final String[] supportName,
                                                    final IHSCommonCallback commonCallback,
                                                    final IHSConnectRecevive receive) {
-        if (isScanning) {
-            return true;
-        }
         hsBluetoothGattCmd.setIhsConnectRecevive(receive);
         if (hsBleManager != null &&
                 hsBleManager.startScanningWithAutoConnecting(
                         scanningTimeout, connectingTimeout,
                         supportName, commonCallback,
                         hsBluetoothGattCmd)) {
-            isScanning = true;
             return true;
         } else {
             return false;
@@ -120,7 +106,6 @@ public class HSManager {
      * 停止扫描
      */
     public void stopScanning(final IHSBleScanCallBack iBleScanCallBack) {
-        isScanning = false;
         if (hsBleManager != null) {
             hsBleManager.stopScanning();
             if (iBleScanCallBack != null) {
@@ -204,18 +189,6 @@ public class HSManager {
     public BluetoothAdapter getBleAdapter() {
         if (hsBleManager != null) {
             return hsBleManager.getBleAdapter();
-        }
-        return null;
-    }
-
-    /**
-     * 获取在系统中已经连接的蓝牙设备
-     *
-     * @return
-     */
-    public List<BluetoothDevice> getSystemConnectingDevice() {
-        if (hsBleManager != null) {
-            return hsBleManager.getSystemConnectingDevice();
         }
         return null;
     }

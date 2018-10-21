@@ -17,6 +17,9 @@ import android.view.WindowManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 一些公共的方法
@@ -365,6 +368,38 @@ public class HSUtils {
             }
         }
         return flag;
+    }
+
+    /**
+     * 获取在系统中已经连接的蓝牙设备
+     *
+     * @return
+     */
+    public static List<BluetoothDevice> getSystemConnectingDevice() {
+        List<BluetoothDevice> deviceList = new ArrayList<>();
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        Class<BluetoothAdapter> bluetoothAdapterClass = BluetoothAdapter.class;//得到BluetoothAdapter的Class对象
+        try {
+            //得到连接状态的方法
+            Method method = bluetoothAdapterClass.getDeclaredMethod("getConnectionState", (Class[]) null);
+            //打开权限
+            method.setAccessible(true);
+            int state = (int) method.invoke(adapter, (Object[]) null);
+            if (state == BluetoothAdapter.STATE_CONNECTED) {
+                Set<BluetoothDevice> devices = adapter.getBondedDevices();
+                for (BluetoothDevice device : devices) {
+                    Method isConnectedMethod = BluetoothDevice.class.getDeclaredMethod("isConnected", (Class[]) null);
+                    method.setAccessible(true);
+                    boolean isConnected = (boolean) isConnectedMethod.invoke(device, (Object[]) null);
+                    if (isConnected) {
+                        deviceList.add(device);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return deviceList;
     }
 
 
