@@ -4,8 +4,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.util.DisplayMetrics;
-
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,7 +16,7 @@ import com.handscape.sdk.inf.IHSConnectRecevive;
 import com.handscape.sdk.inf.IHSTouchCmdReceive;
 
 /**
- * 触摸SDK总入口
+ * 蓝牙触摸SDK入口
  */
 public class HSManager {
 

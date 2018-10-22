@@ -22,6 +22,12 @@
         android:layout_height="40dp"
         android:text="停止扫描" />
 
+    <Button
+        android:id="@+id/getconnect"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="获取已经连接的设备" />
+
     <TextView
         android:id="@+id/text"
         android:layout_width="match_parent"

@@ -3,6 +3,7 @@ package com.handscape.sdk.util;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
@@ -12,6 +13,7 @@ import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.WindowManager;
 
 import java.lang.reflect.Field;
@@ -387,13 +389,17 @@ public class HSUtils {
             int state = (int) method.invoke(adapter, (Object[]) null);
             if (state == BluetoothAdapter.STATE_CONNECTED) {
                 Set<BluetoothDevice> devices = adapter.getBondedDevices();
-                for (BluetoothDevice device : devices) {
-                    Method isConnectedMethod = BluetoothDevice.class.getDeclaredMethod("isConnected", (Class[]) null);
-                    method.setAccessible(true);
-                    boolean isConnected = (boolean) isConnectedMethod.invoke(device, (Object[]) null);
-                    if (isConnected) {
-                        deviceList.add(device);
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+                    for (BluetoothDevice device : devices) {
+                        Method isConnectedMethod = BluetoothDevice.class.getDeclaredMethod("isConnected", (Class[]) null);
+                        method.setAccessible(true);
+                        boolean isConnected = (boolean) isConnectedMethod.invoke(device, (Object[]) null);
+                        if (isConnected) {
+                            deviceList.add(device);
+                        }
                     }
+                }else{
+                    deviceList.addAll(devices);
                 }
             }
         } catch (Exception e) {
@@ -401,6 +407,7 @@ public class HSUtils {
         }
         return deviceList;
     }
+
 
 
 }

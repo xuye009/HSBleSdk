@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.handscape.sdk.ble.HSBluetoothGattCmd;
-import com.handscape.sdk.ble.HSLeScan;
+import com.handscape.sdk.ble.HSLeScanCallBack;
 import com.handscape.sdk.util.HSUtils;
 import com.handscape.sdk.inf.IHSCommonCallback;
 import com.handscape.sdk.inf.IHSBleScanCallBack;
@@ -52,14 +52,14 @@ class HSBleManager {
 
 
     //蓝牙回调类
-    private HSLeScan hsScanCallback = null;
+    private HSLeScanCallBack hsScanCallback = null;
 
     public HSBleManager(Context context) {
         mScheduledExecutorHandler = new Handler();
         this.mContext = context;
         bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         mAdapter = bluetoothManager.getAdapter();
-        hsScanCallback = new HSLeScan();
+        hsScanCallback = new HSLeScanCallBack();
         initadapter();
     }
 
@@ -165,6 +165,7 @@ class HSBleManager {
             }
         }
         if (flag && device != null) {
+            Log.v("xuyeConnect","connectsystem "+device.getName());
             connect(device, connectingTimeout, commonCallback, hsBluetoothGattCmd);
             return true;
         } else {
@@ -172,6 +173,7 @@ class HSBleManager {
             ihsBleScanCallBack.setSupportName(supportName);
             ihsBleScanCallBack.setCommonCallback(commonCallback);
             ihsBleScanCallBack.setHsBluetoothGattCmd(hsBluetoothGattCmd);
+            Log.v("xuyeConnect","startScanning ");
             return startScanning(ihsBleScanCallBack, scanningTimeout);
         }
     }

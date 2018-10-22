@@ -5,11 +5,13 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -22,11 +24,12 @@ import com.handscape.sdk.inf.IHSBleScanCallBack;
 import com.handscape.sdk.inf.IHSCommonCallback;
 import com.handscape.sdk.inf.IHSConnectRecevive;
 import com.handscape.sdk.util.HSPermissionCheck;
+import com.handscape.sdk.util.HSUtils;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener, IHSBleScanCallBack {
 
 
-    private Button scanbuttonn, disscanbutton, scanbuttonautton;
+    private Button scanbuttonn, disscanbutton, scanbuttonautton, getconnect;
     private RecyclerView recyclelist;
     private Adapter mAdapter;
 
@@ -47,6 +50,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     }
 
     private void init() {
+        getconnect = findViewById(R.id.getconnect);
         scanbuttonautton = findViewById(R.id.scanbuttonautton);
         scanbuttonn = findViewById(R.id.scanbutton);
         disscanbutton = findViewById(R.id.disscanbutton);
@@ -58,6 +62,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         scanbuttonn.setOnClickListener(this);
         disscanbutton.setOnClickListener(this);
         scanbuttonautton.setOnClickListener(this);
+        getconnect.setOnClickListener(this);
     }
 
     @Override
@@ -75,6 +80,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.getconnect:
+                List<BluetoothDevice> deviceList = HSUtils.getSystemConnectingDevice();
+                tv.setText("成功onScanResult");
+                devices.clear();
+                devices.addAll(deviceList);
+                mAdapter.notifyDataSetChanged();
+                break;
             case R.id.scanbutton:
                 hsManager.startScanning(10 * 1000, this);
                 devices.clear();
@@ -85,46 +97,41 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             case R.id.scanbuttonautton:
                 builder = new StringBuilder();
                 recyclelist.setVisibility(View.GONE);
-                hsManager.startScanningWithAutoConnecting(10*1000, 20*1000,
-                        new String[]{"HS","HSPro"}, new IHSCommonCallback() {
+                hsManager.startScanningWithAutoConnecting(10 * 1000, 20 * 1000,
+                        new String[]{"HS", "HSPro"}, new IHSCommonCallback() {
                             @Override
                             public void failed() {
-                                builder.append("failed\n");
-                                tv.setText(builder.toString());
+                                appendText("failed");
                             }
 
                             @Override
                             public void success() {
-                                builder.append("success\n");
-                                tv.setText(builder.toString());
+                                appendText("success");
 
                             }
                         }, new IHSConnectRecevive() {
                             @Override
                             public void onDeviceVerifySuccess(BluetoothGatt gatt, int status) {
-                                builder.append("onDeviceVerifySuccess\n");
-                                tv.setText(builder.toString());
+                                appendText("onDeviceVerifySuccess");
 
                             }
 
                             @Override
                             public void onDeviceConnected(BluetoothGatt gatt, int status) {
-                                builder.append("onDeviceConnected\n");
-                                tv.setText(builder.toString());
+                                appendText("onDeviceConnected");
 
                             }
 
                             @Override
                             public void onDeviceDisConnected(BluetoothGatt gatt, int status) {
-                                builder.append("onDeviceDisConnected\n");
-                                tv.setText(builder.toString());
+                                appendText("onDeviceDisConnected");
 
                             }
 
                             @Override
                             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-                                builder.append("onCharacteristicChanged\n");
-                                tv.setText(builder.toString());
+
+                                appendText("onCharacteristicChanged");
                             }
 
                             @Override
@@ -208,11 +215,20 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
                 tv.setText("成功onBatchScanResults");
             }
         });
 //        devices.addAll(deviceList);
 //        mAdapter.notifyDataSetChanged();
+    }
+
+    private void appendText(final String text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                builder.append(text + "\n");
+                tv.setText(builder.toString());
+            }
+        });
     }
 }
