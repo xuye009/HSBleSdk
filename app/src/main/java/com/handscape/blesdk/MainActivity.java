@@ -45,6 +45,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 //    UUID[] seiviceUUIDs=new UUID[]{ HandScapeUUID.s_HOU_SERVICE};
     UUID[] seiviceUUIDs=null;
 
+    private HSPermissionCheck permissionCheck;
 
 
     UUID[] seiviceUUIDs1=new UUID[]{ HandScapeUUID.s_HOU_SERVICE};
@@ -54,7 +55,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         setContentView(R.layout.activity_main);
         hsManager = MyApp.getMyapp().getHsManager();
         init();
-        HSPermissionCheck.getInstance().onCreate(this, hsManager.getBleAdapter());
+        permissionCheck= HSPermissionCheck.getInstance();
+
+        permissionCheck.onCreate(this,hsManager.getBleAdapter());
     }
 
     private void init() {
@@ -75,12 +78,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        HSPermissionCheck.getInstance().onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        permissionCheck.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        HSPermissionCheck.getInstance().onActivityResult(requestCode, resultCode, data);
+        permissionCheck.onActivityResult(requestCode, resultCode, data);
     }
 
     StringBuilder builder = new StringBuilder();

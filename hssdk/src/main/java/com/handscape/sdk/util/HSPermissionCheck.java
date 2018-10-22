@@ -17,9 +17,9 @@ public class HSPermissionCheck {
     /**
      * 位置模拟
      */
-    public static final int REQUEST_LOCATION=0x1000000;
+    public static final int REQUEST_LOCATION=100;
 
-    public static final int REQUEST_BLETOOTH=0x10001001;
+    public static final int REQUEST_BLETOOTH=101;
 
 
     private Activity appCompatActivity;
