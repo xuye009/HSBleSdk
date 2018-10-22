@@ -42,9 +42,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     private TextView tv;
 
-//    UUID[] seiviceUUIDs=new UUID[]{ HandScapeUUID.s_HOU_SERVICE};
-    UUID[] seiviceUUIDs=null;
-
     private HSPermissionCheck permissionCheck;
 
 
@@ -100,7 +97,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 mAdapter.notifyDataSetChanged();
                 break;
             case R.id.scanbutton:
-                hsManager.startScanning(10 * 1000, this,seiviceUUIDs);
+                hsManager.startScanning(10 * 1000, this);
                 devices.clear();
                 break;
             case R.id.disscanbutton:

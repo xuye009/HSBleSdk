@@ -74,11 +74,26 @@ public class HSTouchDispatch implements Runnable {
      * 添加触摸指令
      * @param command
      */
-    public void addCmd(HSTouchCommand command) {
+    public void addCmd(final HSTouchCommand command) {
         try {
-            mTouchCommandQueue.put(command);
-            mCommands[command.getId()] = command;
-            mDispathcHandler.post(this);
+            Log.v("xuyeAction ",command.getAction()+"");
+            mDispathcHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    String cmd=makeTouchEventString(command);
+                    if(receive!=null){
+                        receive.onCmdReceive(cmd);
+                    }
+                    try {
+                        sendTouchCommandData(cmd);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+//            mTouchCommandQueue.put(command);
+//            mCommands[command.getId()] = command;
+//            mDispathcHandler.post(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -112,7 +127,7 @@ public class HSTouchDispatch implements Runnable {
         Log.v("xuyeAction",command.getAction()+"");
         String result = "touch " +command.getAction()
                 + " " + getTouchCount() + " " + command.getId()
-                + " " + touchedCmd2String();
+                + " " + touchedCmd2String(command);
         return result;
     }
 
@@ -132,6 +147,12 @@ public class HSTouchDispatch implements Runnable {
         }
         return builder.toString();
     }
+
+
+    private String touchedCmd2String(HSTouchCommand command) {
+        return new StringBuilder(command.getStream()).toString();
+    }
+
 
     private int getTouchCount() {
         int count = 0;

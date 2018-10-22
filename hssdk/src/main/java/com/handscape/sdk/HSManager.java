@@ -62,7 +62,7 @@ public class HSManager {
      * @param time：时间限制
      * @param iBleScanCallBack
      */
-    public boolean startScanning(final long time, final IHSBleScanCallBack iBleScanCallBack,final UUID[] serviceUUId) {
+    public boolean startScanning(final long time, final IHSBleScanCallBack iBleScanCallBack) {
         if (hsBleManager != null && hsBleManager.startScanning(iBleScanCallBack, time)) {
             return true;
         } else {
