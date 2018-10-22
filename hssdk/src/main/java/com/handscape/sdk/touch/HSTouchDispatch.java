@@ -76,7 +76,7 @@ public class HSTouchDispatch implements Runnable {
      */
     public void addCmd(final HSTouchCommand command) {
         try {
-            Log.v("xuyeAction ",command.getAction()+"");
+            Log.v("xuyeAction ",command.toString()+"");
             mDispathcHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -124,7 +124,6 @@ public class HSTouchDispatch implements Runnable {
      * 生成触摸指令]"
      * */
     private String makeTouchEventString(HSTouchCommand command) {
-        Log.v("xuyeAction",command.getAction()+"");
         String result = "touch " +command.getAction()
                 + " " + getTouchCount() + " " + command.getId()
                 + " " + touchedCmd2String(command);
