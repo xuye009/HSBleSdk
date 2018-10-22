@@ -10,7 +10,6 @@
         android:layout_height="40dp"
         android:text="扫描设备" />
 
-
     <Button
         android:id="@+id/scanbuttonautton"
         android:layout_width="match_parent"

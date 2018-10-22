@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
-import android.util.Log;
 
 import java.util.List;
 import java.util.UUID;
@@ -75,8 +74,6 @@ import com.handscape.sdk.util.HSSingleTaskManager;
 
 
     private void handservice(final BluetoothGatt gatt, int status){
-
-        Log.v("xuye","onServicesDiscovered"+gatt.getServices().size());
         if (gatt != null && gatt.getServices() != null && gatt.getServices().size() > 0) {
             List<BluetoothGattService> gattServices = gatt.getServices();
             for (int i = 0; i < gattServices.size(); i++) {

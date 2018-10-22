@@ -7,11 +7,15 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
+import android.os.ParcelUuid;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -67,6 +71,7 @@ class HSBleManager {
      * 开启扫描
      *
      * @param iBleScanCallBack：扫描需要的回调接口
+     * @param time                       扫描限制时间
      */
     public boolean startScanning(final IHSBleScanCallBack iBleScanCallBack, final long time) {
         if (isScanning) {
@@ -146,13 +151,19 @@ class HSBleManager {
      *
      * @param scanningTimeout：扫描时长
      * @param connectingTimeout：连接超时
+     * @param onlyStsrem                是否只判断系统是否连接
      * @param supportName：符合要求的设备名称
      * @param supportName：支持的名称
      * @param commonCallback：连接回调
      * @param hsBluetoothGattCmd：获取数据回调
      * @return true：开始扫描；false：启动扫描失败
      */
-    public boolean startScanningWithAutoConnecting(final long scanningTimeout, final long connectingTimeout, final String[] supportName, final IHSCommonCallback commonCallback, final HSBluetoothGattCmd hsBluetoothGattCmd) {
+    public boolean startScanningWithAutoConnecting(final long scanningTimeout,
+                                                   final long connectingTimeout,
+                                                   final boolean onlyStsrem,
+                                                   final String[] supportName,
+                                                   final IHSCommonCallback commonCallback,
+                                                   final HSBluetoothGattCmd hsBluetoothGattCmd) {
         boolean flag = false;
         BluetoothDevice device = null;
         //首先获取系统已经连接的设备
@@ -165,15 +176,16 @@ class HSBleManager {
             }
         }
         if (flag && device != null) {
-            Log.v("xuyeConnect","connectsystem "+device.getName());
             connect(device, connectingTimeout, commonCallback, hsBluetoothGattCmd);
             return true;
         } else {
+            if (onlyStsrem) {
+                return false;
+            }
             ihsBleScanCallBack.setConnectingTimeOut(connectingTimeout);
             ihsBleScanCallBack.setSupportName(supportName);
             ihsBleScanCallBack.setCommonCallback(commonCallback);
             ihsBleScanCallBack.setHsBluetoothGattCmd(hsBluetoothGattCmd);
-            Log.v("xuyeConnect","startScanning ");
             return startScanning(ihsBleScanCallBack, scanningTimeout);
         }
     }

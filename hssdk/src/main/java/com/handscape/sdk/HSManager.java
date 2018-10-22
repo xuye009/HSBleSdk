@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.util.DisplayMetrics;
+
 import java.util.Set;
 import java.util.UUID;
 
@@ -61,7 +62,7 @@ public class HSManager {
      * @param time：时间限制
      * @param iBleScanCallBack
      */
-    public boolean startScanning(final long time, final IHSBleScanCallBack iBleScanCallBack) {
+    public boolean startScanning(final long time, final IHSBleScanCallBack iBleScanCallBack,final UUID[] serviceUUId) {
         if (hsBleManager != null && hsBleManager.startScanning(iBleScanCallBack, time)) {
             return true;
         } else {
@@ -71,16 +72,13 @@ public class HSManager {
 
 
     /**
-     * * 扫描并且自动连接
+     * 扫描并且自动连接
      *
-     * @param scanningTimeout：扫描时长
-     * @param connectingTimeout：连接超时
-     * @param supportName：符合要求的设备名称
-     * @param scanningTimeout：扫描超时
-     * @param connectingTimeout：连接超时
-     * @param supportName：支持的名称
-     * @param commonCallback：连接回调
-     * @param receive：获取数据回调
+     * @param scanningTimeout   扫描时长
+     * @param connectingTimeout 连接超时
+     * @param supportName       符合要求的设备名称
+     * @param commonCallback    连接回调
+     * @param receive           获取数据回调
      * @return
      */
     public boolean startScanningWithAutoConnecting(final long scanningTimeout,
@@ -92,13 +90,40 @@ public class HSManager {
         if (hsBleManager != null &&
                 hsBleManager.startScanningWithAutoConnecting(
                         scanningTimeout, connectingTimeout,
-                        supportName, commonCallback,
-                        hsBluetoothGattCmd)) {
+                        false, supportName,
+                        commonCallback, hsBluetoothGattCmd)) {
             return true;
         } else {
             return false;
         }
     }
+    /**
+     * 判断系统中连接的设备是否有符合要求的
+     *
+     * @param scanningTimeout   扫描时长
+     * @param connectingTimeout 连接超时
+     * @param supportName       符合要求的设备名称
+     * @param commonCallback    连接回调
+     * @param receive           获取数据回调
+     * @return
+     */
+    public boolean checkSystemConnect(final long scanningTimeout,
+                                      final long connectingTimeout,
+                                      final String[] supportName,
+                                      final IHSCommonCallback commonCallback,
+                                      final IHSConnectRecevive receive) {
+        hsBluetoothGattCmd.setIhsConnectRecevive(receive);
+        if (hsBleManager != null &&
+                hsBleManager.startScanningWithAutoConnecting(
+                        scanningTimeout, connectingTimeout,
+                        true,supportName,
+                        commonCallback,hsBluetoothGattCmd)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     /**
      * 停止扫描

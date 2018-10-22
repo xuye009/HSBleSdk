@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.handscape.sdk.HSManager;
 import com.handscape.sdk.inf.IHSBleScanCallBack;
@@ -25,6 +26,7 @@ import com.handscape.sdk.inf.IHSCommonCallback;
 import com.handscape.sdk.inf.IHSConnectRecevive;
 import com.handscape.sdk.util.HSPermissionCheck;
 import com.handscape.sdk.util.HSUtils;
+import com.handscape.sdk.util.HandScapeUUID;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener, IHSBleScanCallBack {
 
@@ -40,7 +42,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     private TextView tv;
 
-    @Override
+//    UUID[] seiviceUUIDs=new UUID[]{ HandScapeUUID.s_HOU_SERVICE};
+    UUID[] seiviceUUIDs=null;
+
+
+
+    UUID[] seiviceUUIDs1=new UUID[]{ HandScapeUUID.s_HOU_SERVICE};
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -88,7 +96,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 mAdapter.notifyDataSetChanged();
                 break;
             case R.id.scanbutton:
-                hsManager.startScanning(10 * 1000, this);
+                hsManager.startScanning(10 * 1000, this,seiviceUUIDs);
                 devices.clear();
                 break;
             case R.id.disscanbutton:
